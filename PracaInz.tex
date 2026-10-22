@@ -7,10 +7,15 @@
 \usepackage{longtable}
 \usepackage{xltabular}
 \usepackage{caption}
+\usepackage{adr}
+
 \usepackage{tikz}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usetikzlibrary{shapes, arrows.meta, positioning, calc, chains, scopes}
+
+% \usepackage[print]{edition}
+\usepackage[print]{edition}
 
 \newcolumntype{Y}{>{\centering\arraybackslash}X}
 
@@ -19,14 +24,11 @@
 \begin{document}
 \raggedbottom
 
-% Title page and AI statement: put the PDFs in Title/ and AIStatement/
-% and set the file names below (pages are skipped if the files are missing).
-\IfFileExists{Title/TitlePage.pdf}{\includepdf[pages=1]{Title/TitlePage.pdf}}{}
+
+\IfFileExists{Title/StronaTytulowa_193169.pdf}{\includepdf[pages=1]{Title/StronaTytulowa_193169.pdf}}{}
 
 \cleardoublepage
 \IfFileExists{AIStatement/AIStatement.pdf}{\includepdf[pages=1]{AIStatement/AIStatement.pdf}}{}
-
-\setcounter{page}{4}
 
 \cleardoublepage
 \selectlanguage{english}
@@ -47,6 +49,15 @@
 \cleardoublepage
 % **** main part ************
 \include{chapters/01Introduction}
+\include{chapters/02Background}
+\include{chapters/03LiteratureReview}
+\include{chapters/04Methodology}
+\include{chapters/05Implementation}
+\include{chapters/06Experiments}
+\include{chapters/07Results}
+\include{chapters/08Discussion}
+\include{chapters/09Threats}
+\include{chapters/10Conclusions}
 % **** end of main part *****
 
 \cleardoublepage
@@ -71,6 +82,11 @@ Author A.: \textit{Example reference}. Publisher, Year.
 \phantomsection
 \addcontentsline{toc}{chapter}{List of Listings}
 \lstlistoflistings
+
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{\listadrname}
+\listofadrs
 
 \begin{appendices}
 \include{AppA}

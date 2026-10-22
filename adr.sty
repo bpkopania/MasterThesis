@@ -1,0 +1,121 @@
+%% adr.sty -- Architecture Decision Records (ADR)
+%%
+%% WHAT IT DOES
+%%   An ADR is described once, in the chapter where the decision is explained.
+%%   This package then
+%%     - numbers it automatically (ADR 01, ADR 02, ...),
+%%     - collects all ADRs in one list, like the list of figures,
+%%     - lets any other place in the thesis refer to it by a short key.
+%%
+%% HOW IT WORKS
+%%   \begin{adr}{<key>}{<title>} ... \end{adr} does four things:
+%%     1. increments the ADR counter and prints "ADR NN: <title>" followed by
+%%        the description in a block with a bar on the left,
+%%     2. creates the label adr:<key>, so the ADR can be referenced,
+%%     3. writes an entry (number, title, page, link) to the .loa file, which
+%%        \listofadrs prints (same mechanism as the .lof file for figures),
+%%     4. stores the title in the .aux file, so \adrtitle and \adrfull also
+%%        work for ADRs that are defined later in the text.
+%%   References are resolved by cleveref, so two LaTeX runs are needed after
+%%   adding or changing an ADR.
+%%
+%% USAGE
+%%   Define, in the chapter that explains the decision:
+%%     \begin{adr}{<key>}{<title>}
+%%       description
+%%     \end{adr}
+%%
+%%   Refer to it anywhere in the text:
+%%     \adrref{<key>}      ADR 01                     (clickable)
+%%     \adrtitle{<key>}    the title only
+%%     \adrfull{<key>}     ADR 01: <title>
+%%
+%%   Print the list (already placed in PracaInz.tex after the list of figures):
+%%     \cleardoublepage
+%%     \phantomsection
+%%     \addcontentsline{toc}{chapter}{\listadrname}
+%%     \listofadrs
+%%
+%% RULES
+%%   - <key> is the stable identifier used in references. It must be unique
+%%     and should name the decision, e.g. tool-use-harness.
+%%   - Numbers follow the order of appearance in the text and are never typed
+%%     by hand. Moving a chapter renumbers the ADRs; references stay correct.
+%%   - \listadrname holds the heading of the list; redefine it to change it.
+%%
+%% EXAMPLE
+%%   In chapters/05Implementation.tex, section "Execution Harness":
+%%
+%%     \begin{adr}{tool-use-harness}{Tool use executed by our own harness}
+%%       \textbf{Context.} Both systems need access to the project files.
+%%       \textbf{Decision.} The models call tools (\texttt{read\_file},
+%%       \texttt{write\_file}, \texttt{run\_tests}) and the harness executes
+%%       them in an isolated directory.
+%%       \textbf{Consequences.} Only the architecture differs between the
+%%       compared systems, and every run is reproducible and logged.
+%%     \end{adr}
+%%
+%%   In chapters/04Methodology.tex:
+%%
+%%     Both systems use the same tools (\adrref{tool-use-harness}).
+%%     This follows \adrfull{tool-use-harness}.
+%%
+%%   Result in the text:
+%%     Both systems use the same tools (ADR 01).
+%%     This follows ADR 01: Tool use executed by our own harness.
+%%
+%%   Result in the list of ADRs:
+%%     ADR 01  Tool use executed by our own harness ........ 12
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{adr}[2026/10/22 Architecture Decision Records]
+
+\RequirePackage{framed}
+\RequirePackage{hyperref}
+\RequirePackage{cleveref}
+
+\newcounter{adr}
+\renewcommand\theadr{\two@digits{\value{adr}}}
+
+\newcommand\adrprefix{ADR}
+\providecommand\listadrname{Architecture Decision Records}
+
+\crefname{adr}{ADR}{ADRs}
+\Crefname{adr}{ADR}{ADRs}
+
+\newcommand\adr@settitle[2]{%
+  \expandafter\gdef\csname adr@title@#1\endcsname{#2}}
+
+\newenvironment{adr}[2]{%
+  \par\addvspace{\medskipamount}%
+  \noindent
+  \refstepcounter{adr}%
+  \hyper@anchorstart{\@currentHref}\hyper@anchorend
+  \label{adr:#1}%
+  \@bsphack
+  \protected@write\@auxout{}{\string\adr@settitle{#1}{#2}}%
+  \@esphack
+  \addcontentsline{loa}{adr}{\protect\numberline{\adrprefix~\theadr}#2}%
+  \textbf{\adrprefix~\theadr:\enspace #2}\par\nobreak\smallskip
+  \begin{leftbar}\ignorespaces
+}{%
+  \end{leftbar}\par\addvspace{\medskipamount}%
+}
+
+\newcommand*\adrref[1]{\cref{adr:#1}}
+\newcommand*\adrtitle[1]{%
+  \ifcsname adr@title@#1\endcsname
+    \csname adr@title@#1\endcsname
+  \else
+    \textbf{??}%
+  \fi}
+\newcommand*\adrfull[1]{\adrref{#1}: \adrtitle{#1}}
+
+\newcommand*\l@adr{\@dottedtocline{1}{0em}{4.5em}}
+\newcommand\listofadrs{%
+  \chapter*{\listadrname}%
+  \@mkboth{\MakeUppercase\listadrname}{\MakeUppercase\listadrname}%
+  \@starttoc{loa}%
+}
+
+\endinput

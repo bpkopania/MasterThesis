@@ -1,0 +1,74 @@
+%% edition.sty -- print and screen editions of the thesis
+%%
+%% WHAT IT DOES
+%%   One source, two PDFs. The edition is chosen by one package option:
+%%     \usepackage[print]{edition}     paper version (default)
+%%     \usepackage[screen]{edition}    electronic version
+%%
+%%   print   - the title page, abstracts, chapters, lists and appendices start
+%%             on a right-hand page; a blank left-hand page is inserted
+%%             whenever needed
+%%           - margins for binding: inner 3.5 cm, outer 2.5 cm, mirrored on
+%%             facing pages
+%%   screen  - no blank pages: every element starts on the next page
+%%           - equal left and right margins (3 cm)
+%%
+%%   Both editions have the same text width (15 cm) and text height, so lines
+%%   and pages break in the same places. The only difference in pagination is
+%%   the blank pages of the print edition.
+%%
+%% HOW IT WORKS
+%%   print:  \chapter starts with \cleardoublepage (openright), and the
+%%           explicit \cleardoublepage calls in PracaInz.tex add blank pages.
+%%   screen: \chapter starts with \clearpage (openany) and \cleardoublepage is
+%%           redefined as \clearpage, so the explicit calls add no blank pages.
+%%   The class pginz keeps its two-sided layout in both editions. The margins
+%%   are changed with \geometry, so pginz.cls itself is not modified.
+%%
+%% USAGE
+%%   In PracaInz.tex, after the other packages:
+%%     \usepackage[print]{edition}
+%%   Change print to screen to build the electronic version. Run LaTeX twice
+%%   after switching, because blank pages change the page numbers.
+%%
+%%   Put \cleardoublepage (not \clearpage) before every element that should
+%%   start on a right-hand page in the print edition. In the screen edition it
+%%   behaves like \clearpage.
+%%
+%%   The switch \ifprintedition is available for content that differs between
+%%   the editions.
+%%
+%% EXAMPLE
+%%   \usepackage[screen]{edition}        % electronic version, no blank pages
+%%
+%%   \cleardoublepage                    % print: right-hand page, screen: next page
+%%   \chapter*{Abstract}
+%%
+%%   \ifprintedition
+%%     Printed copy.
+%%   \else
+%%     Electronic copy.
+%%   \fi
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{edition}[2026/10/22 Print and screen editions]
+
+\RequirePackage{geometry}
+
+\newif\ifprintedition
+
+\DeclareOption{print}{\printeditiontrue}
+\DeclareOption{screen}{\printeditionfalse}
+\ExecuteOptions{print}
+\ProcessOptions\relax
+
+\ifprintedition
+  \geometry{inner=3.5cm,outer=2.5cm,top=2.5cm,bottom=2.5cm}
+  \@openrighttrue
+\else
+  \geometry{inner=3cm,outer=3cm,top=2.5cm,bottom=2.5cm}
+  \@openrightfalse
+  \AtBeginDocument{\let\cleardoublepage\clearpage}
+\fi
+
+\endinput
